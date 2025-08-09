@@ -18,6 +18,8 @@ import ipfshttpclient
 import tweepy
 from flask import Flask, render_template_string, request, jsonify
 import os
+from stem import Signal
+from stem.control import Controller
 
 # Tor proxy setup
 os.environ["TOR_PROXY"] = "socks5://127.0.0.1:9050"
@@ -36,6 +38,16 @@ TASK_EXPLANATIONS = {
     "fuzz": "Testing with random data to find crashes.",
     "exploit": "Creating a bypass from found issues."
 }
+
+# Rotate Tor identity
+def rotate_tor_identity():
+    try:
+        with Controller.from_port(port=9051) as controller:
+            controller.authenticate()
+            controller.signal(Signal.NEWNYM)
+        print("Tor identity rotated")
+    except Exception as e:
+        print(f"Tor rotation error: {e}")
 
 # Simple code analysis
 def analyze_code(file_path):
@@ -90,6 +102,7 @@ def detect_platform(file_path):
 
 # Share exploit on IPFS and Twitter
 def share_exploit(file_path, exploit_name):
+    rotate_tor_identity()  # Rotate identity before sharing
     try:
         client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001')
         res = client.add(str(Path(file_path).absolute()))
@@ -102,7 +115,7 @@ def share_exploit(file_path, exploit_name):
         
         return f"https://ipfs.io/ipfs/{exploit_hash}"
     except Exception as e:
-        print(f"Share error: {e}")
+        print(f"Share error: {e}. Ensure IPFS daemon is running.")
         return None
 
 # Tasks
@@ -142,7 +155,7 @@ def run_fuzz(file_path):
                             (Path(root) / d).rmdir()
                     Path(dir).rmdir()
     else:
-        return {"result": None, "task": "fuzz"}
+        return {"result": None, "task": "fuzz", "error": "Fuzzing not supported on this platform"}
 
 def run_exploit(file_path):
     print(TASK_EXPLANATIONS["exploit"])
