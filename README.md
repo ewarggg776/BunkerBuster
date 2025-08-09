@@ -1,9 +1,7 @@
-# BunkerBuster 🔍💥 <a name="top"></a>
+# BunkerBuster  <a name="top"></a>
 
 **BunkerBuster** is a *simple, anonymous* tool for finding software vulnerabilities and sharing exploits securely. It runs on **any device**—Windows, Linux, macOS, phones—via a one-click GUI, CLI, web app, or Docker. With **Tor** for privacy and **IPFS** for decentralized sharing, it’s built for researchers.
 
-> [!NOTE]  
-> BunkerBuster is designed for **ethical research only**. Ensure you have permission before testing systems.
 
 ## Features <a name="features"></a>
 
