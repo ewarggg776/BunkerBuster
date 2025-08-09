@@ -21,8 +21,8 @@ case "$OS" in
 esac
 
 # Install dependencies
-echo "Installing dependencies..."
-pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask
+echo "Installing Python dependencies..."
+pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem
 
 # Install Tor
 echo "Installing Tor..."
@@ -37,7 +37,7 @@ case "$OS" in
         brew services start tor
         ;;
     *)
-        echo "Please install Tor manually"
+        echo "Please install Tor manually (e.g., Tor Browser for Windows)"
         ;;
 esac
 
@@ -47,14 +47,23 @@ openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 36
 
 # Configure environment
 echo "Configuring environment..."
+export PATH=$PATH:/usr/local/bin
+echo "export PATH=$PATH:/usr/local/bin" >> ~/.bashrc
 export TOR_PROXY="socks5://127.0.0.1:9050"
 echo "export TOR_PROXY=socks5://127.0.0.1:9050" >> ~/.bashrc
+
+# For Windows users
+if [ "$OS" = "CYGWIN"* ] || [ "$OS" = "MINGW"* ]; then
+    echo "For Windows, use PowerShell to install dependencies:"
+    echo "pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem"
+    echo "Download and install Tor Browser for Tor support."
+fi
 
 # Build Docker image
 echo "Building Docker image..."
 cat <<EOF > Dockerfile
 FROM python:3.9-slim
-RUN apt-get update && apt-get install -y tor && pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask
+RUN apt-get update && apt-get install -y tor && pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem
 COPY . /app
 WORKDIR /app
 CMD ["python", "bunkerbuster.py"]
