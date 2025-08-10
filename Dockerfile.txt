@@ -1,7 +1,12 @@
 FROM python:3.9-slim
 
 # Install dependencies
-RUN apt-get update && apt-get install -y tor && pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem
+RUN apt-get update && apt-get install -y tor && \
+    echo "ControlPort 9051" >> /etc/tor/torrc && \
+    pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem Pillow torch transformers
+
+# Download LLaMA model
+RUN python -c "from transformers import LLaMAForCausalLM, LLaMATokenizer; LLaMAForCausalLM.from_pretrained('meta-llama/Llama-3.1-8B'); LLaMATokenizer.from_pretrained('meta-llama/Llama-3.1-8B')"
 
 # Copy project files
 COPY . /app
