@@ -10,6 +10,7 @@
 - **Cross-Platform**: Works on laptops, phones, servers. :computer::iphone:
 - **Auto-Sharing**: Exploits sent to **IPFS** and **Twitter** automatically. :rocket:
 - **Clear Logs**: Shows tasks like `Checking code for weaknesses`. :memo:
+- **LLM-Assisted**: Uses **Hugging Face LLaMA** for task management.
 
 ## Quick Start <a name="quick-start"></a>
 
