@@ -22,13 +22,14 @@ esac
 
 # Install dependencies
 echo "Installing Python dependencies..."
-pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem
+pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem Pillow torch transformers
 
-# Install Tor
+# Install Tor with control port
 echo "Installing Tor..."
 case "$OS" in
     Linux)
         sudo apt-get install -y tor
+        sudo sed -i 's/#ControlPort 9051/ControlPort 9051/' /etc/tor/torrc
         sudo systemctl enable tor
         sudo systemctl start tor
         ;;
@@ -40,6 +41,10 @@ case "$OS" in
         echo "Please install Tor manually (e.g., Tor Browser for Windows)"
         ;;
 esac
+
+# Download LLaMA model
+echo "Downloading LLaMA 3.1 model..."
+python -c "from transformers import LLaMAForCausalLM, LLaMATokenizer; LLaMAForCausalLM.from_pretrained('meta-llama/Llama-3.1-8B'); LLaMATokenizer.from_pretrained('meta-llama/Llama-3.1-8B')"
 
 # Generate SSL certificates
 echo "Generating SSL certificates..."
@@ -55,19 +60,23 @@ echo "export TOR_PROXY=socks5://127.0.0.1:9050" >> ~/.bashrc
 # For Windows users
 if [ "$OS" = "CYGWIN"* ] || [ "$OS" = "MINGW"* ]; then
     echo "For Windows, use PowerShell to install dependencies:"
-    echo "pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem"
+    echo "pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem Pillow torch transformers"
     echo "Download and install Tor Browser for Tor support."
+    echo "Download LLaMA model manually: huggingface.co/meta-llama/Llama-3.1-8B"
 fi
 
 # Build Docker image
 echo "Building Docker image..."
 cat <<EOF > Dockerfile
 FROM python:3.9-slim
-RUN apt-get update && apt-get install -y tor && pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem
+RUN apt-get update && apt-get install -y tor && \
+    echo "ControlPort 9051" >> /etc/tor/torrc && \
+    pip install PyQt5 websockets requests beautifulsoup4 python-magic-bin ipfshttpclient tweepy flask stem Pillow torch transformers
+RUN python -c "from transformers import LLaMAForCausalLM, LLaMATokenizer; LLaMAForCausalLM.from_pretrained('meta-llama/Llama-3.1-8B'); LLaMATokenizer.from_pretrained('meta-llama/Llama-3.1-8B')"
 COPY . /app
 WORKDIR /app
 CMD ["python", "bunkerbuster.py"]
 EOF
 docker build -t bunkerbuster .
 
-echo "Setup complete. Run with: python bunkerbuster.py [--admin|--web|--cli]"
+echo "Setup complete. Run with: python bunkerbuster.py [--admin|--finder|--web|--cli]"
