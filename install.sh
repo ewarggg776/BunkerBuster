@@ -1,6 +1,17 @@
 #!/bin/bash
 
-# Enhanced error handling
+# Check if we're running in bash, if not switch to bash
+if [ -z "${BASH_VERSION:-}" ]; then
+    if command -v bash >/dev/null 2>&1; then
+        exec bash "$0" "$@"
+    else
+        echo "Error: This script requires bash, but bash is not available."
+        echo "Please install bash or run with: bash $0"
+        exit 1
+    fi
+fi
+
+# Enhanced error handling (bash-specific)
 set -e  # Exit on any error
 set -u  # Exit on undefined variables
 
