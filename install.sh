@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Ensure we're using bash
+if [ -z "$BASH_VERSION" ]; then
+    exec bash "$0" "$@"
+fi
+
 # Detect OS
 OS=$(uname -s)
 echo "Detected OS: $OS"
